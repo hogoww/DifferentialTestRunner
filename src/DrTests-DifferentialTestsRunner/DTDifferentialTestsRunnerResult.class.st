@@ -15,19 +15,32 @@ DTDifferentialTestsRunnerResult >> calculateDifference [
 	previous ifNil:[ ^ self ]."Nothing to compare, first execution"
 	
 	testsResult passed do:[:aPassingTest| 
-		(previous passed anySatisfy: [:aTest| aTest selector = aPassingTest selector]) 
+		(self is: aPassingTest in: previous passed)
 			ifFalse: [ differentialResult addPass: aPassingTest ]].
 		
-	previous failures do:[:aFailingTest|	
-			(previous failures anySatisfy: [:aTest| aTest selector = aFailingTest selector]) 
-				ifFalse: [ differentialResult addFailure: aFailingTest ]].
+	testsResult failures do:[:aFailingTest|		
+		(self is: aFailingTest in: previous failure)
+			ifFalse: [ differentialResult addFailure: aFailingTest ]].
 			
-	previous errors do:[:anErroredTest|	
-			(previous error anySatisfy: [:aTest| aTest selector = anErroredTest selector]) 
-				ifFalse: [ differentialResult addError: anErroredTest ]].
+	testsResult errors do:[:anErroredTest|
+		(self is: anErroredTest in: previous errors)
+			ifFalse: [ differentialResult addError: anErroredTest ]].
 	
-	self halt.
 	^ differentialResult
+]
+
+{ #category : #testing }
+DTDifferentialTestsRunnerResult >> is: aTest in: aPreviousTestCollection [ 
+	^ aPreviousTestCollection 
+		anySatisfy: [:aPreviousTest | self is: aTest theSameAs: aPreviousTest ]
+]
+
+{ #category : #testing }
+DTDifferentialTestsRunnerResult >> is: aTest theSameAs: anotherTest [
+	"predicate to compare current and previous result.
+	Can probably be improved"
+	^ aTest selector = anotherTest selector 
+		and: [ aTest class = anotherTest class ]
 ]
 
 { #category : #accessing }
