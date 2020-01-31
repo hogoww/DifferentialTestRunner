@@ -12,7 +12,7 @@ Class {
 DTDifferentialTestsRunnerResult >> calculateDifference [
 	| previous |
 	differentialResult := TestResult new.
-	previousResults currentTestResults ifNil:[ ^ self ]."Nothing to compare, first execution"
+	previousResults ifNil:[ ^ self ]."Nothing to compare, first execution"
 	previous := previousResults currentTestResults.
 	
 	testsResult passed do:[:aPassingTest| 
@@ -20,7 +20,7 @@ DTDifferentialTestsRunnerResult >> calculateDifference [
 			ifFalse: [ differentialResult addPass: aPassingTest ]].
 		
 	testsResult failures do:[:aFailingTest|		
-		(self is: aFailingTest in: previous failure)
+		(self is: aFailingTest in: previous failures)
 			ifFalse: [ differentialResult addFailure: aFailingTest ]].
 			
 	testsResult errors do:[:anErroredTest|
