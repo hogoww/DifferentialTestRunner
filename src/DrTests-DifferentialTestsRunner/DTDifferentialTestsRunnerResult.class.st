@@ -2,14 +2,15 @@ Class {
 	#name : #DTDifferentialTestsRunnerResult,
 	#superclass : #DTTestsRunnerResult,
 	#instVars : [
-		'previousResults'
+		'previousResults',
+		'differentialResult'
 	],
 	#category : #'DrTests-DifferentialTestsRunner'
 }
 
 { #category : #accessing }
 DTDifferentialTestsRunnerResult >> calculateDifference [
-	| previous differentialResult |
+	| previous |
 	differentialResult := TestResult new.
 	previous := previousResults testResults.
 	previous ifNil:[ ^ self ]."Nothing to compare, first execution"
@@ -25,8 +26,13 @@ DTDifferentialTestsRunnerResult >> calculateDifference [
 	testsResult errors do:[:anErroredTest|
 		(self is: anErroredTest in: previous errors)
 			ifFalse: [ differentialResult addError: anErroredTest ]].
-	
-	^ differentialResult
+]
+
+{ #category : #accessing }
+DTDifferentialTestsRunnerResult >> color [
+	differentialResult errors ifNotEmpty: [ ^ self theme dangerBackgroundColor ].
+	differentialResult failures ifNotEmpty: [ ^ self theme warningBackgroundColor ].
+	^ self theme successBackgroundColor
 ]
 
 { #category : #testing }
@@ -51,4 +57,36 @@ DTDifferentialTestsRunnerResult >> previousResults [
 { #category : #accessing }
 DTDifferentialTestsRunnerResult >> previousResults: aTestResult [
 	previousResults := aTestResult
+]
+
+{ #category : #accessing }
+DTDifferentialTestsRunnerResult >> summarizeInfo [
+	"Text showed in miniDrTests with info of the result "
+	^ String
+		streamContents: [ :s | 
+			
+			testsResult passed ifNotEmpty:[
+				s
+					print: self testResults passed size;
+					<< ' new tests passed';
+					cr
+				].
+			testsResult failures ifNotEmpty:[
+				s
+					print: self testResults failures size;
+					<< ' new tests failures';
+					cr
+				].
+			testsResult errors ifNotEmpty:[
+				s
+					print: self testResults errors size;
+					<< ' new tests errors';
+					cr
+			]
+		]
+]
+
+{ #category : #accessing }
+DTDifferentialTestsRunnerResult >> testResults [
+	^ differentialResult
 ]
