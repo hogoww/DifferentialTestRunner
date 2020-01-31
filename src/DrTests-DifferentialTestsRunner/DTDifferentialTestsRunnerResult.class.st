@@ -12,8 +12,8 @@ Class {
 DTDifferentialTestsRunnerResult >> calculateDifference [
 	| previous |
 	differentialResult := TestResult new.
-	previous := previousResults testResults.
-	previous ifNil:[ ^ self ]."Nothing to compare, first execution"
+	previousResults currentTestResults ifNil:[ ^ self ]."Nothing to compare, first execution"
+	previous := previousResults currentTestResults.
 	
 	testsResult passed do:[:aPassingTest| 
 		(self is: aPassingTest in: previous passed)
@@ -35,8 +35,14 @@ DTDifferentialTestsRunnerResult >> color [
 	^ self theme successBackgroundColor
 ]
 
+{ #category : #accessing }
+DTDifferentialTestsRunnerResult >> currentTestResults [
+	^ testsResult
+]
+
 { #category : #testing }
 DTDifferentialTestsRunnerResult >> is: aTest in: aPreviousTestCollection [ 
+	"tests are not compared as I thought, so I'm using a custom predicate"
 	^ aPreviousTestCollection 
 		anySatisfy: [:aPreviousTest | self is: aTest theSameAs: aPreviousTest ]
 ]
@@ -65,24 +71,29 @@ DTDifferentialTestsRunnerResult >> summarizeInfo [
 	^ String
 		streamContents: [ :s | 
 			
-			testsResult passed ifNotEmpty:[
+			differentialResult passed ifNotEmpty:[
 				s
 					print: self testResults passed size;
 					<< ' new tests passed';
 					cr
 				].
-			testsResult failures ifNotEmpty:[
+			differentialResult failures ifNotEmpty:[
 				s
 					print: self testResults failures size;
 					<< ' new tests failures';
 					cr
 				].
-			testsResult errors ifNotEmpty:[
+			differentialResult errors ifNotEmpty:[
 				s
 					print: self testResults errors size;
 					<< ' new tests errors';
 					cr
-			]
+			].
+			(differentialResult passed isEmpty 
+				and: [ differentialResult failures isEmpty 
+					and: [ differentialResult errors isEmpty ]])
+				ifTrue:[
+					s print: 'No tests have changed !'; cr ]
 		]
 ]
 
