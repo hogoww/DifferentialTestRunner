@@ -11,8 +11,14 @@ Class {
 { #category : #accessing }
 DTDifferentialTestsRunnerResult >> calculateDifference [
 	| previous |
+	"Nothing to compare, so it should show everything"
+	previousResults ifNil:[ 
+		differentialResult := testsResult.
+		previousResults := testsResult.
+		^ self
+	].
+	
 	differentialResult := TestResult new.
-	previousResults ifNil:[ ^ self ]."Nothing to compare, first execution"
 	previous := previousResults currentTestResults.
 	
 	testsResult passed do:[:aPassingTest| 
