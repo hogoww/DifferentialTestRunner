@@ -12,13 +12,13 @@ Class {
 DTDifferentialTestsRunnerResult >> calculateDifference [
 	| previous |
 	"Nothing to compare, so it should show everything"
-	previousResults ifNil:[ 
-		differentialResult := testsResult.
-		previousResults := testsResult.
+	
+	previousResults ifNil:[
+		differentialResult := testsResult asDTDiffenretialTestResults.
 		^ self
 	].
-	
-	differentialResult := TestResult new.
+
+	differentialResult := DTDifferentialTestsResults new.
 	previous := previousResults currentTestResults.
 	
 	testsResult passed do:[:aPassingTest| 
